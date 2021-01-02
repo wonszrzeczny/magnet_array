@@ -17,7 +17,7 @@ String input, command;
 #define Y_STP     3 
 #define Z_STP     4 
 
-
+String wtf = "";
 //DRV8825
 int delayTime=100;
 long stps= 288000;
@@ -45,7 +45,7 @@ String getValue(String data, char separator, int index)
 {
     int found = 0;
     int strIndex[] = { 0, -1 };
-    int maxIndex = data.length() - 2;
+    int maxIndex = data.length() - 1 - (data[data.length()-1]==char('\n'));
     for (int i = 0; i <= maxIndex && found <= index; i++) {
         if (data.charAt(i) == separator || i == maxIndex) {
             found++;
@@ -74,19 +74,17 @@ void setup(){
 
 
 void loop(){
-  
    while (Serial.available()) {
-    delay(3);  //delay to allow buffer to fill
+    delay(10);  //delay to allow buffer to fill
     if (Serial.available() >0) {
       char c = Serial.read();  
       input += c; 
     }
   }
-  Serial.print(input);
-  delay(100);
+
 
   //handling input
-  if (input.length() >0) { 
+  if (input.length() >0) {
 
     //moving magnets format: move dx dy dz db
     if(getValue(input, ' ', 0) == "mov" or getValue(input, ' ', 0) == "move"){
@@ -94,16 +92,16 @@ void loop(){
         long val = parse_long(getValue(input,' ', index+1));
         step(index, val);
       } 
-    }
+        }
     //position query
-    
     if(getValue(input, ' ', 0) == "pos"){
       String output = "";
       for(int i=0; i < 3; i++){
         output+=String(pos[i]) + " ";
       }
-      Serial.print(output);
+      Serial.println(output);
     }
+    
 
     //turning on and off between uses since it heats up and we don't want to turn off the arduino, since it has the positions
     
@@ -113,8 +111,8 @@ void loop(){
     if(getValue(input, ' ', 0) == "on"){
     digitalWrite(EN, LOW);
     }
-
+  
   }
+  delay(10);
   input = "";
-  delay(100);
 }
