@@ -1,9 +1,6 @@
 #define EN        8 
 
 
-
-int dirs[3] = {5, 6, 7};
-int steps[3] = {2, 3, 4};
 String input, command;
 
 
@@ -17,9 +14,11 @@ String input, command;
 #define Y_STP     3 
 #define Z_STP     4 
 
-String wtf = "";
+int dirs[3] = {X_DIR, Y_DIR, Z_DIR};
+int steps[3] = {X_STP, Y_STP, Z_STP};
+
 //DRV8825
-int delayTime=100;
+int delayTime=100; // unused
 long stps= 288000;
 long pos[3] = {0,0,0};
 
@@ -39,6 +38,8 @@ void move(boolean dir, int dirPin, int stepperPin, long steps)
 void step(int index, long dist){
   move(dist > 0, dirs[index], steps[index], abs(dist));
   pos[index] += dist;
+  pos[index] = pos[index] % stps ;
+
 }
 
 String getValue(String data, char separator, int index)
@@ -86,7 +87,9 @@ void loop(){
   //handling input
   if (input.length() >0) {
 
-    //moving magnets format: move dx dy dz db
+    //moving magnets format: move dx dy dz
+    //change this format when modyfying magnet numbers - currently expecting 3 motors
+    //might add a configuration file such that it doesn't take modyfying both this and the python code later
     if(getValue(input, ' ', 0) == "mov" or getValue(input, ' ', 0) == "move"){
       for(int index = 0; index  < 3; index+=1){
         long val = parse_long(getValue(input,' ', index+1));
@@ -94,6 +97,7 @@ void loop(){
       } 
         }
     //position query
+    //again, change the magic 3 here
     if(getValue(input, ' ', 0) == "pos"){
       String output = "";
       for(int i=0; i < 3; i++){
@@ -104,7 +108,6 @@ void loop(){
     
 
     //turning on and off between uses since it heats up and we don't want to turn off the arduino, since it has the positions
-    
     if(getValue(input, ' ', 0) == "off"){
     digitalWrite(EN, HIGH);
     }
