@@ -8,30 +8,33 @@ String input, command;
 #define X_DIR     5 
 #define Y_DIR     6
 #define Z_DIR     7
+#define W_DIR     13
 
 //Step pin
 #define X_STP     2
 #define Y_STP     3 
 #define Z_STP     4 
+#define W_STP     12
 
-int dirs[3] = {X_DIR, Y_DIR, Z_DIR};
-int steps[3] = {X_STP, Y_STP, Z_STP};
+
+int dirs[4] = {X_DIR, Y_DIR, Z_DIR, W_DIR};
+int steps[4] = {X_STP, Y_STP, Z_STP, W_STP};
 
 //DRV8825
 int delayTime=100; // unused
-long stps= 288000;
-long pos[3] = {0,0,0};
+long stps= 18000;
+long pos[4] = {0,0,0, 0};
 
 void move(boolean dir, int dirPin, int stepperPin, long steps)
 
 {
   digitalWrite(dirPin, dir);
   delay(10);
-  for (long i = 0L; i < steps; i++) {
+  for (long i = 0; i < steps; i++) {
     digitalWrite(stepperPin, HIGH);
-    delayMicroseconds(1); 
+    delayMicroseconds(300); 
     digitalWrite(stepperPin, LOW);
-    delayMicroseconds(30); 
+    delayMicroseconds(300); 
   }
 }
 
@@ -68,6 +71,8 @@ void setup(){
   pinMode(X_DIR, OUTPUT); pinMode(X_STP, OUTPUT);
   pinMode(Y_DIR, OUTPUT); pinMode(Y_STP, OUTPUT);
   pinMode(Z_DIR, OUTPUT); pinMode(Z_STP, OUTPUT);
+  pinMode(W_DIR, OUTPUT); pinMode(W_STP, OUTPUT);
+
   pinMode(EN, OUTPUT);
   digitalWrite(EN, LOW);
 }
@@ -91,7 +96,7 @@ void loop(){
     //change this format when modyfying magnet numbers - currently expecting 3 motors
     //might add a configuration file such that it doesn't take modyfying both this and the python code later
     if(getValue(input, ' ', 0) == "mov" or getValue(input, ' ', 0) == "move"){
-      for(int index = 0; index  < 3; index+=1){
+      for(int index = 0; index  < 4; index+=1){
         long val = parse_long(getValue(input,' ', index+1));
         step(index, val);
       } 
@@ -100,7 +105,7 @@ void loop(){
     //again, change the magic 3 here
     if(getValue(input, ' ', 0) == "pos"){
       String output = "";
-      for(int i=0; i < 3; i++){
+      for(int i=0; i < 4; i++){
         output+=String(pos[i]) + " ";
       }
       Serial.println(output);
